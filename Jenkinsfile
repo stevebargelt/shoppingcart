@@ -16,7 +16,7 @@ node ('aspdotnetcore_shoppingcart') {
     	sh "docker push abs-registry.harebrained-apps.com/shoppingcart:${env.BUILD_NUMBER}"
 	}
 	stage('ABS-Test') {
-		docker.withServer('tcp://abs.harebrained-apps.com:2376', 'dockerTLS') {
+		docker.withServer('tcp://abs.harebrained-apps.com:2376', 'dockerTLSCerts') {
 			sh "docker pull abs-registry.harebrained-apps.com/shoppingcart:${env.BUILD_NUMBER}"
 			sh "docker stop shoppingcart || true && docker rm shoppingcart || true"
 			sh "docker run -d --name shoppingcart -p 8007:80 abs-registry.harebrained-apps.com/shoppingcart:${env.BUILD_NUMBER}"
