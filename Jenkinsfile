@@ -1,8 +1,11 @@
 #!/usr/bin/env groovy
 
+import groovy.json.JsonOutput
+
 node ('aspdotnetcore_shoppingcart') {
 	try {
 		notifyBuild('STARTED')
+    notifyAtomist('STARTED', 'STARTED')
 		stage('Build') {    
 			git url: 'https://github.com/stevebargelt/shoppingcart'
 			sh 'dotnet restore test/shoppingcart.Tests/shoppingcart.Tests.csproj'
@@ -30,6 +33,7 @@ node ('aspdotnetcore_shoppingcart') {
 	} finally {
 			// Success or failure, always send notifications
     	notifyBuild(currentBuild.result)
+      notifyAtomist(currentBuild.result, currentBuild.result)
 	}
 
 } //node
@@ -68,4 +72,29 @@ def notifyBuild(String buildStatus = 'STARTED') {
   //     body: details,
   //     recipientProviders: [[$class: 'DevelopersRecipientProvider']]
   //   )
+  
+}
+
+def getSCMInformation() {
+    def gitUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim()
+    def gitSha = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+    def gitBranch = sh(returnStdout: true, script: 'git name-rev --always --name-only HEAD').trim().replace('remotes/origin/', '')
+    return [ url: gitUrl, branch: gitBranch, commit: gitSha ]
+}
+
+def notifyAtomist(buildStatus, buildPhase="FINALIZED",
+                  endpoint="https://webhook.atomist.com/atomist/jenkins/teams/T14LTGA75") {
+
+    def payload = JsonOutput.toJson([
+        name: env.JOB_NAME,
+        duration: currentBuild.duration,
+        build: [
+            number: env.BUILD_NUMBER,
+            phase: buildPhase,
+            status: buildStatus,
+            full_url: env.BUILD_URL,
+            scm: getSCMInformation()
+        ]
+    ])
+    sh "curl --silent -XPOST -H 'Content-Type: application/json' -d '${payload}' ${endpoint}"
 }
