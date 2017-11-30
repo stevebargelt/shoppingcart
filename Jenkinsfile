@@ -77,7 +77,8 @@ def notifyBuild(String buildStatus = 'STARTED') {
 
 def getSCMInformation() {
     sh "echo 'in getSCMInformation'"
-    def gitUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim()
+    def gitUrl = scm.getUserRemoteConfigs()[0].getUrl()
+    //def gitUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim()
     def gitSha = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
     def gitBranch = sh(returnStdout: true, script: 'git name-rev --always --name-only HEAD').trim().replace('remotes/origin/', '')
     return [ url: gitUrl, branch: gitBranch, commit: gitSha ]
