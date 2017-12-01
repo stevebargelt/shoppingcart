@@ -1,6 +1,10 @@
 #!/usr/bin/env groovy
 
 import groovy.json.JsonOutput
+// def shortCommit
+// def gitUrl
+// def gitSha
+// def gitBranch
 
 node ('aspdotnetcore_shoppingcart') {
 	try {
@@ -37,11 +41,12 @@ node ('aspdotnetcore_shoppingcart') {
 	} finally {
 			// Success or failure, always send notifications
     	notifyBuild(currentBuild.result)
-      notifyAtomist(currentBuild.result, currentBuild.result)
+      notifyAtomist(currentBuild.result)
 	}
 
 } //node
 
+@NonCPS
 def notifyBuild(String buildStatus = 'STARTED') {
   // build status of null means successful
   buildStatus = buildStatus ?: 'SUCCESSFUL'
@@ -71,9 +76,9 @@ def notifyBuild(String buildStatus = 'STARTED') {
    
 }
 
-// def getSCMInformation() {
-//     return [ url: gitUrl, branch: gitBranch, commit: gitSha ]
-// }
+def getSCMInformation() {
+    return [ url: gitUrl, branch: gitBranch, commit: gitSha ]
+}
 
 def notifyAtomist(buildStatus, buildPhase="FINALIZED",
                   endpoint="https://webhook.atomist.com/atomist/jenkins/teams/T14LTGA75") {
@@ -86,7 +91,7 @@ def notifyAtomist(buildStatus, buildPhase="FINALIZED",
             phase: buildPhase,
             status: buildStatus,
             full_url: env.BUILD_URL,
-            scm: [ url: "${gitUrl}", branch: "${gitBranch}", commit: "${gitSha}" ]
+            scm: getSCMInformation()
         ]
     ])
     sh "curl --silent -XPOST -H \'Content-Type: application/json\' -d '${payload}' ${endpoint}"
