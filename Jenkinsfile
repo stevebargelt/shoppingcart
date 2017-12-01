@@ -4,6 +4,7 @@ import groovy.json.JsonOutput
 
 node ('aspdotnetcore_shoppingcart') {
 	try {
+    origin_url = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim()
 		notifyBuild('STARTED')
     notifyAtomist('STARTED', 'STARTED')
 		stage('Build') {    
@@ -68,7 +69,7 @@ def notifyBuild(String buildStatus = 'STARTED') {
 }
 
 def getSCMInformation() {
-    def gitUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim()
+    def gitUrl = origin_url
     return [ url: gitUrl ]
 }
 
