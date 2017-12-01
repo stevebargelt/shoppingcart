@@ -42,40 +42,40 @@ node ('aspdotnetcore_shoppingcart') {
 } //node
 
 @NonCPS
-def notifyBuild(String buildStatus = 'STARTED') {
-  // build status of null means successful
-  buildStatus = buildStatus ?: 'SUCCESSFUL'
+// def notifyBuild(String buildStatus = 'STARTED') {
+//   // build status of null means successful
+//   buildStatus = buildStatus ?: 'SUCCESSFUL'
  
-  // Default values
-  def colorName = 'RED'
-  def colorCode = '#FF0000'
-  def subject = "Status=${buildStatus}, Job=${env.JOB_NAME}, Build=${env.BUILD_NUMBER}"
-  def summary = "${subject}, URL=${env.BUILD_URL}"
-  def details = """<p>${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
-    <p>Check console output at "<a href="${env.BUILD_URL}">${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>"</p>"""
+//   // Default values
+//   def colorName = 'RED'
+//   def colorCode = '#FF0000'
+//   def subject = "Status=${buildStatus}, Job=${env.JOB_NAME}, Build=${env.BUILD_NUMBER}"
+//   def summary = "${subject}, URL=${env.BUILD_URL}"
+//   def details = """<p>${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
+//     <p>Check console output at "<a href="${env.BUILD_URL}">${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>"</p>"""
  
-  // Override default values based on build status
-  if (buildStatus == 'STARTED') {
-    color = 'YELLOW'
-    colorCode = '#FFFF00'
-  } else if (buildStatus == 'SUCCESSFUL') {
-    color = 'GREEN'
-    colorCode = '#36a64f'
-  } else {
-    color = 'RED'
-    colorCode = '#FF0000'
-  }
+//   // Override default values based on build status
+//   if (buildStatus == 'STARTED') {
+//     color = 'YELLOW'
+//     colorCode = '#FFFF00'
+//   } else if (buildStatus == 'SUCCESSFUL') {
+//     color = 'GREEN'
+//     colorCode = '#36a64f'
+//   } else {
+//     color = 'RED'
+//     colorCode = '#FF0000'
+//   }
  
-  // Send notifications
-  slackSend (color: colorCode, message: summary)
+//   // Send notifications
+//   slackSend (color: colorCode, message: summary)
    
-}
+// }
 
 def notifyAtomist(buildStatus, buildPhase="FINALIZED",
                   endpoint="https://webhook.atomist.com/atomist/jenkins/teams/T14LTGA75") {
 
     // build status of null means successful
-    buildStatus = buildStatus ?: 'SUCCESSFUL'
+    buildStatus = buildStatus ?: 'SUCCESS'
 
     def payload = JsonOutput.toJson([
         name: env.JOB_NAME,
