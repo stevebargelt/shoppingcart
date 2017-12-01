@@ -71,12 +71,11 @@ def notifyBuild(String buildStatus = 'STARTED') {
    
 }
 
-// def getSCMInformation() {
-//     return [ url: gitUrl, branch: gitBranch, commit: gitSha ]
-// }
-
 def notifyAtomist(buildStatus, buildPhase="FINALIZED",
                   endpoint="https://webhook.atomist.com/atomist/jenkins/teams/T14LTGA75") {
+
+    // build status of null means successful
+    buildStatus = buildStatus ?: 'SUCCESSFUL'
 
     def payload = JsonOutput.toJson([
         name: env.JOB_NAME,
