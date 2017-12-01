@@ -1,18 +1,18 @@
 #!/usr/bin/env groovy
 
 import groovy.json.JsonOutput
-// def shortCommit
-// def gitUrl
-// def gitSha
-// def gitBranch
+def shortCommit
+def gitUrl
+def gitSha
+def gitBranch
 
 node ('aspdotnetcore_shoppingcart') {
 	try {
 		git url: 'https://github.com/stevebargelt/shoppingcart'
-    def shortCommit = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
-    def gitUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim()
-    def gitSha = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-    def gitBranch = sh(returnStdout: true, script: 'git name-rev --always --name-only HEAD').trim().replace('remotes/origin/', '')
+    shortCommit = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
+    gitUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim()
+    gitSha = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+    gitBranch = sh(returnStdout: true, script: 'git name-rev --always --name-only HEAD').trim().replace('remotes/origin/', '')
 		notifyBuild('STARTED')
     notifyAtomist('STARTED', 'STARTED')
 		stage('Build') {    
