@@ -4,13 +4,9 @@ import groovy.json.JsonOutput
 
 node ('aspdotnetcore_shoppingcart') {
 	try {
-    def branch = "${env.BRANCH_NAME}"
-    branch = branch.toLowerCase()
     echo "Build Number is: ${env.BUILD_NUMBER}"
-    echo "Branch name is: ${env.BRANCH_NAME}"
     echo "Job Name is: ${env.JOB_NAME}"
     def commit_id, source, origin_url, name
-    
     origin_url = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim()
     echo "origin url is: ${origin_url}"
 		notifyBuild('STARTED')
@@ -77,7 +73,7 @@ def notifyBuild(String buildStatus = 'STARTED') {
 }
 
 def getSCMInformation() {
-    def gitUrl = origin_url
+    def gitUrl = "https://github.com/stevebargelt/shoppingcart"
     return [ url: gitUrl ]
 }
 
