@@ -67,6 +67,11 @@ def notifyBuild(String buildStatus = 'STARTED') {
    
 }
 
+def getSCMInformation() {
+    def gitUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim()
+    return [ url: gitUrl ]
+}
+
 def notifyAtomist(buildStatus, buildPhase="FINALIZED",
                   endpoint="https://webhook.atomist.com/atomist/jenkins/teams/T14LTGA75") {
 
@@ -77,7 +82,7 @@ def notifyAtomist(buildStatus, buildPhase="FINALIZED",
             number: env.BUILD_NUMBER,
             phase: buildPhase,
             status: buildStatus,
-            full_url: env.BUILD_URL,
+            full_url: env.BUILD_URL
         ]
     ])
     sh "curl --silent -XPOST -H 'Content-Type: application/json' -d '${payload}' ${endpoint}"
