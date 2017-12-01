@@ -5,7 +5,7 @@ import groovy.json.JsonOutput
 node ('aspdotnetcore_shoppingcart') {
 	try {
     origin_url = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim()
-    echo origin_url
+    echo "origin url is: ${origin_url}"
 		notifyBuild('STARTED')
     notifyAtomist('STARTED', 'STARTED')
 		stage('Build') {    
