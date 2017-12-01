@@ -7,7 +7,7 @@ node ('aspdotnetcore_shoppingcart') {
     echo "Build Number is: ${env.BUILD_NUMBER}"
     echo "Job Name is: ${env.JOB_NAME}"
     def commit_id, source, origin_url, name
-    origin_url = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim()
+    origin_url = scm.getUserRemoteConfigs()[0].getUrl()
     echo "origin url is: ${origin_url}"
 		notifyBuild('STARTED')
     notifyAtomist('STARTED', 'STARTED')
