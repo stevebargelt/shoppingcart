@@ -4,10 +4,14 @@ import groovy.json.JsonOutput
 
 node ('aspdotnetcore_shoppingcart') {
 	try {
+		git url: 'https://github.com/stevebargelt/shoppingcart'
+    def shortCommit = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
+    def gitUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim()
+    def gitSha = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+    def gitBranch = sh(returnStdout: true, script: 'git name-rev --always --name-only HEAD').trim().replace('remotes/origin/', '')
 		notifyBuild('STARTED')
     notifyAtomist('STARTED', 'STARTED')
 		stage('Build') {    
-			git url: 'https://github.com/stevebargelt/shoppingcart'
 			sh 'dotnet restore test/shoppingcart.Tests/shoppingcart.Tests.csproj'
 			sh 'dotnet test test/shoppingcart.Tests/shoppingcart.Tests.csproj'
 		}
@@ -88,5 +92,5 @@ def notifyAtomist(buildStatus, buildPhase="FINALIZED",
             scm: getSCMInformation()
         ]
     ])
-    sh "curl --silent -XPOST -H 'Content-Type: application/json' -d '${payload}' ${endpoint}"
+    sh "curl --silent -XPOST -H \'Content-Type: application/json\' -d '${payload}' ${endpoint}"
 }
