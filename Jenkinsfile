@@ -71,12 +71,9 @@ def notifyBuild(String buildStatus = 'STARTED') {
    
 }
 
-// def getSCMInformation() {
-//     def gitUrl = "git@github.com:stevebargelt/shoppingcart"
-//     def gitSha = "15a527b13bc6af4eb89f07e8271a025450705472"
-//     def gitBranch = "master"
-//     return [ url: gitUrl, branch: gitBranch, commit: gitSha ]
-// }
+def getSCMInformation() {
+    return [ url: gitUrl, branch: gitBranch, commit: gitSha ]
+}
 
 def notifyAtomist(buildStatus, buildPhase="FINALIZED",
                   endpoint="https://webhook.atomist.com/atomist/jenkins/teams/T14LTGA75") {
@@ -89,7 +86,7 @@ def notifyAtomist(buildStatus, buildPhase="FINALIZED",
             phase: buildPhase,
             status: buildStatus,
             full_url: env.BUILD_URL,
-            [ url: gitUrl, branch: gitBranch, commit: gitSha ]
+            scm: [ url: gitUrl, branch: gitBranch, commit: gitSha ]
         ]
     ])
     sh "curl --silent -XPOST -H \'Content-Type: application/json\' -d '${payload}' ${endpoint}"
