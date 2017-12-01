@@ -1,18 +1,13 @@
 #!/usr/bin/env groovy
 
 import groovy.json.JsonOutput
-def shortCommit
-def gitUrl
-def gitSha
-def gitBranch
 
 node ('aspdotnetcore_shoppingcart') {
 	try {
 		git url: 'https://github.com/stevebargelt/shoppingcart'
-    shortCommit = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
-    gitUrl = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim()
-    gitSha = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-    gitBranch = sh(returnStdout: true, script: 'git name-rev --always --name-only HEAD').trim().replace('remotes/origin/', '')
+    env.GITURL_ATOMIST = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim()
+    env.GITSHA_ATOMIST = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+    env.GITBRANCH_ATOMIST = sh(returnStdout: true, script: 'git name-rev --always --name-only HEAD').trim().replace('remotes/origin/', '')
 		notifyBuild('STARTED')
     notifyAtomist('STARTED', 'STARTED')
 		stage('Build') {    
@@ -76,9 +71,9 @@ def notifyBuild(String buildStatus = 'STARTED') {
    
 }
 
-def getSCMInformation() {
-    return [ url: gitUrl, branch: gitBranch, commit: gitSha ]
-}
+// def getSCMInformation() {
+//     return [ url: gitUrl, branch: gitBranch, commit: gitSha ]
+// }
 
 def notifyAtomist(buildStatus, buildPhase="FINALIZED",
                   endpoint="https://webhook.atomist.com/atomist/jenkins/teams/T14LTGA75") {
@@ -91,7 +86,7 @@ def notifyAtomist(buildStatus, buildPhase="FINALIZED",
             phase: buildPhase,
             status: buildStatus,
             full_url: env.BUILD_URL,
-            scm: getSCMInformation()
+            scm: [ url: env.GITURL_ATOMIST, branch: env.GITBRANCH_ATOMIST, commit: env.GITSHA_ATOMIST ]
         ]
     ])
     sh "curl --silent -XPOST -H \'Content-Type: application/json\' -d '${payload}' ${endpoint}"
