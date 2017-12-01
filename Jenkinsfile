@@ -82,7 +82,8 @@ def notifyAtomist(buildStatus, buildPhase="FINALIZED",
             number: env.BUILD_NUMBER,
             phase: buildPhase,
             status: buildStatus,
-            full_url: env.BUILD_URL
+            full_url: env.BUILD_URL,
+            scm: getSCMInformation()
         ]
     ])
     sh "curl --silent -XPOST -H 'Content-Type: application/json' -d '${payload}' ${endpoint}"
