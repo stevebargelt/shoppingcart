@@ -8,7 +8,6 @@ node ('aspdotnetcore_shoppingcart') {
     env.GITURL_ATOMIST = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim()
     env.GITSHA_ATOMIST = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
     env.GITBRANCH_ATOMIST = sh(returnStdout: true, script: 'git name-rev --always --name-only HEAD').trim().replace('remotes/origin/', '')
-		notifyBuild('STARTED')
     notifyAtomist('STARTED', 'STARTED')
 		stage('Build') {    
 			sh 'dotnet restore test/shoppingcart.Tests/shoppingcart.Tests.csproj'
@@ -35,42 +34,12 @@ node ('aspdotnetcore_shoppingcart') {
     throw e	
 	} finally {
 			// Success or failure, always send notifications
-    	notifyBuild(currentBuild.result)
       notifyAtomist(currentBuild.result)
 	}
 
 } //node
 
 @NonCPS
-// def notifyBuild(String buildStatus = 'STARTED') {
-//   // build status of null means successful
-//   buildStatus = buildStatus ?: 'SUCCESSFUL'
- 
-//   // Default values
-//   def colorName = 'RED'
-//   def colorCode = '#FF0000'
-//   def subject = "Status=${buildStatus}, Job=${env.JOB_NAME}, Build=${env.BUILD_NUMBER}"
-//   def summary = "${subject}, URL=${env.BUILD_URL}"
-//   def details = """<p>${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':</p>
-//     <p>Check console output at "<a href="${env.BUILD_URL}">${env.JOB_NAME} [${env.BUILD_NUMBER}]</a>"</p>"""
- 
-//   // Override default values based on build status
-//   if (buildStatus == 'STARTED') {
-//     color = 'YELLOW'
-//     colorCode = '#FFFF00'
-//   } else if (buildStatus == 'SUCCESSFUL') {
-//     color = 'GREEN'
-//     colorCode = '#36a64f'
-//   } else {
-//     color = 'RED'
-//     colorCode = '#FF0000'
-//   }
- 
-//   // Send notifications
-//   slackSend (color: colorCode, message: summary)
-   
-// }
-
 def notifyAtomist(buildStatus, buildPhase="FINALIZED",
                   endpoint="https://webhook.atomist.com/atomist/jenkins/teams/T14LTGA75") {
 
