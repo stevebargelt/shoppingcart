@@ -5,10 +5,9 @@ import groovy.json.JsonOutput
 node ('aspdotnetcore_shoppingcart') {
 	try {
 		git url: 'https://github.com/stevebargelt/shoppingcart'
-    env.GITURL_ATOMIST = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim()
-    env.GITSHA_ATOMIST = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-    env.GITBRANCH_ATOMIST = sh(returnStdout: true, script: 'git name-rev --always --name-only HEAD').trim().replace('remotes/origin/', '')
-    notifyAtomist('STARTED', 'STARTED')
+    // env.GITURL_ATOMIST = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim()
+    // env.GITSHA_ATOMIST = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
+    // env.GITBRANCH_ATOMIST = sh(returnStdout: true, script: 'git name-rev --always --name-only HEAD').trim().replace('remotes/origin/', '')
 		stage('Build') {    
 			sh 'dotnet restore test/shoppingcart.Tests/shoppingcart.Tests.csproj'
 			sh 'dotnet test test/shoppingcart.Tests/shoppingcart.Tests.csproj'
