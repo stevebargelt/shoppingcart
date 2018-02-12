@@ -28,6 +28,12 @@ node ('aspdotnetcore_shoppingcart') {
 				sh "docker run -d --name shoppingcart -p 8007:80 absregistry.azurecr.io/shoppingcart:${env.BUILD_NUMBER}"
 			}
 		}
+		stage('Deploy Approval') {
+			input "Deploy to prod?"
+		}
+		stage('Production'){
+			echo "TODO: Deplpoy to PROD"
+		}
 	} catch (e) {
 		currentBuild.result = "FAILED"
     throw e	
