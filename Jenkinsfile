@@ -54,7 +54,7 @@ def notifyAzureFunction(buildColor, buildStatus) {
 node ('aspdotnetcore_shoppingcart') {
 	try {
 		environment { 
-    	AZURE_SERVICEBUS_KEY = = credentials('azServiceBusKey')
+    	AZURE_SERVICEBUS_KEY = credentials('azServiceBusKey')
     }
 		git url: 'https://github.com/stevebargelt/shoppingcart'
 		stage('Build') {    
