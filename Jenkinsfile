@@ -1,16 +1,69 @@
 #!/usr/bin/env groovy
 
 import groovy.json.JsonOutput
+import java.util.Optional
+
+slackNotificationChannel = "development"
+jobName = ""
+commit = ""
+author = ""
+message = ""
+AZURE_SERVICEBUS_KEY = ""
+
+// def isPublishingBranch = { ->
+//     return env.GIT_BRANCH == 'origin/master' || env.GIT_BRANCH =~ /release.+/
+// }
+
+def isResultGoodForPublishing = { ->
+    return currentBuild.result == null
+}
+
+def populateGlobalVariables = {
+
+    jobName = "${env.JOB_NAME}"
+    // Strip the branch name out of the job name (ex: "Job Name/branch1" -> "Job Name")
+    jobName = jobName.getAt(0..(jobName.indexOf('/') - 1))
+
+    commit = sh(returnStdout: true, script: 'git rev-parse HEAD')
+    author = sh(returnStdout: true, script: "git --no-pager show -s --format='%an' ${commit}").trim()
+    message = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
+    AZURE_SERVICEBUS_KEY     = credentials('azServiceBusKey')
+
+}
+
+def notifyAzureFunction(buildColor, buildStatus) {
+    
+    //sh 'echo "***START notifyAzureFunction***"'
+    def azFuncURL = 'https://buildwatcher.azurewebsites.net/api/TestServiceBus?code=${AZURE_SERVICEBUS_KEY}'
+
+    def payload = JsonOutput.toJson([   
+                        job: "${jobName}", 
+                        build: "${env.BUILD_NUMBER}",
+                        title_link: "${env.BUILD_URL}",
+                        color: "${buildColor}",
+                        text: "${buildStatus}\n${author}",
+                        branch: "${env.GIT_BRANCH}",
+                        last_commit: "${message}"
+                    ])
+
+    sh "curl -X POST -H \'Content-Type: application/json\'  -d \'${payload}\' ${azFuncURL}"
+    
+    //sh 'echo "***END notifyAzureFunction***"'
+}
+
 
 node ('aspdotnetcore_shoppingcart') {
 	try {
 		git url: 'https://github.com/stevebargelt/shoppingcart'
-    // env.GITURL_ATOMIST = sh(returnStdout: true, script: 'git config --get remote.origin.url').trim()
-    // env.GITSHA_ATOMIST = sh(returnStdout: true, script: 'git rev-parse HEAD').trim()
-    // env.GITBRANCH_ATOMIST = sh(returnStdout: true, script: 'git name-rev --always --name-only HEAD').trim().replace('remotes/origin/', '')
 		stage('Build') {    
 			sh 'dotnet restore test/shoppingcart.Tests/shoppingcart.Tests.csproj'
 			sh 'dotnet test test/shoppingcart.Tests/shoppingcart.Tests.csproj'
+      
+			populateGlobalVariables()
+      def buildColor = currentBuild.result == null ? "good" : "warning"
+      def buildStatus = currentBuild.result == null ? "Success" : currentBuild.result
+
+      notifyAzureFunction(buildColor, buildStatus)		
 		}
 		stage('Publish') {
 			sh 'dotnet publish src/shoppingcart/shoppingcart.csproj -c release -o $(pwd)/publish/'
@@ -36,6 +89,8 @@ node ('aspdotnetcore_shoppingcart') {
 		}
 	} catch (e) {
 		currentBuild.result = "FAILED"
+    notifyAzureFunction("danger", "FAILED")
+
     throw e	
 	} finally {
 
