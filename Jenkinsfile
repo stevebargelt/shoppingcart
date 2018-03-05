@@ -8,7 +8,7 @@ jobName = ""
 commit = ""
 author = ""
 message = ""
-AZURE_SERVICEBUS_KEY = ""
+azureServicebusKey= ""
 
 // def isPublishingBranch = { ->
 //     return env.GIT_BRANCH == 'origin/master' || env.GIT_BRANCH =~ /release.+/
@@ -27,8 +27,7 @@ def populateGlobalVariables = {
     commit = sh(returnStdout: true, script: 'git rev-parse HEAD')
     author = sh(returnStdout: true, script: "git --no-pager show -s --format='%an' ${commit}").trim()
     message = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
-    AZURE_SERVICEBUS_KEY     = credentials('azServiceBusKey')
-
+		azureServicebusKey = env.AZURE_SERVICEBUS_KEY
 }
 
 def notifyAzureFunction(buildColor, buildStatus) {
@@ -54,6 +53,9 @@ def notifyAzureFunction(buildColor, buildStatus) {
 
 node ('aspdotnetcore_shoppingcart') {
 	try {
+		environment { 
+    	AZURE_SERVICEBUS_KEY = = credentials('azServiceBusKey')
+    }
 		git url: 'https://github.com/stevebargelt/shoppingcart'
 		stage('Build') {    
 			sh 'dotnet restore test/shoppingcart.Tests/shoppingcart.Tests.csproj'
