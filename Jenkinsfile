@@ -50,10 +50,6 @@ def notifyAzureFunction(buildColor, buildStatus) {
 					sh "curl -X POST -H \'Content-Type: application/json\'  -d \'${payload}\' ${azFuncURL}$AZURE_SERVICEBUS_KEY"
 				'''
 			}
-		}
-    
-    
-    //sh 'echo "***END notifyAzureFunction***"'
 }
 
 
