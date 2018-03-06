@@ -33,7 +33,7 @@ def populateGlobalVariables = {
 def notifyAzureFunction(buildColor, buildStatus) {
     
     def azFuncURL = 'https://buildwatcher.azurewebsites.net/api/TestServiceBus?code='
-
+		def azureServucebusKey = ""
     def payload = JsonOutput.toJson([   
                         job: "${jobName}", 
                         build: "${env.BUILD_NUMBER}",
@@ -45,10 +45,12 @@ def notifyAzureFunction(buildColor, buildStatus) {
                     ])
 
 		withCredentials([string(credentialsId: 'azServiceBusKey', variable: 'AZURE_SERVICEBUS_KEY')]) {
-				sh '''
-					curl -X POST -H "Content-Type: application/json"  -d "${payload}" ${azFuncURL}$AZURE_SERVICEBUS_KEY
-				'''
-			}
+			azureServicebusKey = $AZURE_SERVICEBUS_KEY
+		}
+
+		sh '''
+			curl -X POST -H "Content-Type: application/json"  -d "${payload}" ${azFuncURL}${azureServicebusKey}
+		'''
 }
 
 
