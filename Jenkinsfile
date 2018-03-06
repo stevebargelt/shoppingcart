@@ -21,9 +21,6 @@ def isResultGoodForPublishing = { ->
 def populateGlobalVariables = {
 
     jobName = "${env.JOB_NAME}"
-    // Strip the branch name out of the job name (ex: "Job Name/branch1" -> "Job Name")
-    jobName = jobName.getAt(0..(jobName.indexOf('/') - 1))
-
     commit = sh(returnStdout: true, script: 'git rev-parse HEAD')
     author = sh(returnStdout: true, script: "git --no-pager show -s --format='%an' ${commit}").trim()
     message = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
@@ -38,7 +35,8 @@ def notifyAzureFunction(buildColor, buildStatus) {
                         build: "${env.BUILD_NUMBER}",
                         title_link: "${env.BUILD_URL}",
                         color: "${buildColor}",
-                        text: "${buildStatus}\n${author}",
+                        text: "${buildStatus}",
+												author: "${author}",
                         branch: "${env.GIT_BRANCH}",
                         last_commit: "${message}"
                     ])
