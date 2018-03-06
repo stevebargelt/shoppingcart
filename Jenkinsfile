@@ -8,7 +8,7 @@ jobName = ""
 commit = ""
 author = ""
 message = ""
-azureServicebusKey= ""
+
 
 // def isPublishingBranch = { ->
 //     return env.GIT_BRANCH == 'origin/master' || env.GIT_BRANCH =~ /release.+/
@@ -32,8 +32,7 @@ def populateGlobalVariables = {
 
 def notifyAzureFunction(buildColor, buildStatus) {
     
-    //sh 'echo "***START notifyAzureFunction***"'
-    def azFuncURL = 'https://buildwatcher.azurewebsites.net/api/TestServiceBus?code=${azureServicebusKey}'
+    def azFuncURL = 'https://buildwatcher.azurewebsites.net/api/TestServiceBus?code='
 
     def payload = JsonOutput.toJson([   
                         job: "${jobName}", 
@@ -45,7 +44,14 @@ def notifyAzureFunction(buildColor, buildStatus) {
                         last_commit: "${message}"
                     ])
 
-    sh "curl -X POST -H \'Content-Type: application/json\'  -d \'${payload}\' ${azFuncURL}"
+		withCredentials([string(credentialsId: 'azServicebusKey', variable: 'AZURE_SERVICEBUS_KEY')]) {
+				sh '''
+					set +x
+					sh "curl -X POST -H \'Content-Type: application/json\'  -d \'${payload}\' ${azFuncURL}$AZURE_SERVICEBUS_KEY"
+				'''
+			}
+		}
+    
     
     //sh 'echo "***END notifyAzureFunction***"'
 }
@@ -53,9 +59,7 @@ def notifyAzureFunction(buildColor, buildStatus) {
 
 node ('aspdotnetcore_shoppingcart') {
 	try {
-		environment { 
-    	AZURE_SERVICEBUS_KEY = credentials('azServiceBusKey')
-    }
+
 		git url: 'https://github.com/stevebargelt/shoppingcart'
 		stage('Build') {    
 			sh 'dotnet restore test/shoppingcart.Tests/shoppingcart.Tests.csproj'
