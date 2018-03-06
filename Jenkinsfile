@@ -33,7 +33,7 @@ def populateGlobalVariables = {
 def notifyAzureFunction(buildColor, buildStatus) {
     
     //sh 'echo "***START notifyAzureFunction***"'
-    def azFuncURL = 'https://buildwatcher.azurewebsites.net/api/TestServiceBus?code=${AZURE_SERVICEBUS_KEY}'
+    def azFuncURL = 'https://buildwatcher.azurewebsites.net/api/TestServiceBus?code=${azureServicebusKey}'
 
     def payload = JsonOutput.toJson([   
                         job: "${jobName}", 
