@@ -27,7 +27,6 @@ def populateGlobalVariables = {
     commit = sh(returnStdout: true, script: 'git rev-parse HEAD')
     author = sh(returnStdout: true, script: "git --no-pager show -s --format='%an' ${commit}").trim()
     message = sh(returnStdout: true, script: 'git log -1 --pretty=%B').trim()
-		azureServicebusKey = env.AZURE_SERVICEBUS_KEY
 }
 
 def notifyAzureFunction(buildColor, buildStatus) {
@@ -45,12 +44,12 @@ def notifyAzureFunction(buildColor, buildStatus) {
                     ])
 
 		withCredentials([string(credentialsId: 'azServiceBusKey', variable: 'AZURE_SERVICEBUS_KEY')]) {
-			azureServicebusKey = $AZURE_SERVICEBUS_KEY
+			azureServicebusKey = env.AZURE_SERVICEBUS_KEY
 		}
 
-		sh '''
-			curl -X POST -H "Content-Type: application/json"  -d "${payload}" ${azFuncURL}${azureServicebusKey}
-		'''
+
+    sh "curl -X POST -H \'Content-Type: application/json\'  -d \'${payload}\' ${azFuncURL}${azureServicebusKey}"
+    
 }
 
 
