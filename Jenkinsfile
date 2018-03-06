@@ -44,7 +44,7 @@ def notifyAzureFunction(buildColor, buildStatus) {
                         last_commit: "${message}"
                     ])
 
-		withCredentials([string(credentialsId: 'azServicebusKey', variable: 'AZURE_SERVICEBUS_KEY')]) {
+		withCredentials([string(credentialsId: 'azServiceBusKey', variable: 'AZURE_SERVICEBUS_KEY')]) {
 				sh '''
 					set +x
 					sh "curl -X POST -H \'Content-Type: application/json\'  -d \'${payload}\' ${azFuncURL}$AZURE_SERVICEBUS_KEY"
